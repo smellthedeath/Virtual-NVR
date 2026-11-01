@@ -1,0 +1,138 @@
+mqtt:
+  enabled: false
+
+# --------------------------------------------------------------------------
+# Streaming Gateway (go2rtc)
+# Mainstream (High Resolution / 3K/4K) for 24/7 continuous recording.
+# Substream (Lower Resolution / D1/VGA) for real-time motion & object detection.
+# --------------------------------------------------------------------------
+go2rtc:
+  streams:
+    camera1:
+      - rtsp://{FRIGATE_CAM1_USER}:{FRIGATE_CAM1_PASS}@{FRIGATE_CAM1_HOST}:554{FRIGATE_CAM1_MAINSTREAM_PATH}
+    camera1_sub:
+      - rtsp://{FRIGATE_CAM1_USER}:{FRIGATE_CAM1_PASS}@{FRIGATE_CAM1_HOST}:554{FRIGATE_CAM1_SUBSTREAM_PATH}
+    camera2:
+      - rtsp://{FRIGATE_CAM2_USER}:{FRIGATE_CAM2_PASS}@{FRIGATE_CAM2_HOST}:554{FRIGATE_CAM2_MAINSTREAM_PATH}
+    camera2_sub:
+      - rtsp://{FRIGATE_CAM2_USER}:{FRIGATE_CAM2_PASS}@{FRIGATE_CAM2_HOST}:554{FRIGATE_CAM2_SUBSTREAM_PATH}
+
+cameras:
+  # ========================================================================
+  # Camera 1
+  # ========================================================================
+  camera1:
+    enabled: true
+    ffmpeg:
+      inputs:
+        # High-res stream directly copied to disk without decoding (low CPU)
+        - path: rtsp://127.0.0.1:8554/camera1
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        # Substream decoded for AI and motion detection
+        - path: rtsp://127.0.0.1:8554/camera1_sub
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+    detect:
+      width: 704
+      height: 576
+      fps: 5
+    motion:
+      threshold: 30
+      contour_area: 40
+      improve_contrast: true
+    record:
+      enabled: true
+      continuous:
+        days: 18 # Continuous retention
+      motion:
+        days: 10
+      alerts:
+        retain:
+          days: 10
+      detections:
+        retain:
+          days: 7
+    snapshots:
+      enabled: true
+      retain:
+        default: 7
+    notifications:
+      enabled: true
+    objects:
+      genai:
+        enabled: true
+        use_snapshot: true
+    zones:
+      entry_zone:
+        coordinates: 0.587,0,0.592,0.488,0.748,0.538,0.748,0,0.617,-0.043
+        enabled: true
+        inertia: 3
+        loitering_time: 0
+        friendly_name: Entry Zone
+
+  # ========================================================================
+  # Camera 2
+  # ========================================================================
+  camera2:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/camera2
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/camera2_sub
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+    detect:
+      width: 704
+      height: 576
+      fps: 5
+    motion:
+      threshold: 30
+      contour_area: 40
+      improve_contrast: true
+    record:
+      enabled: true
+      continuous:
+        days: 18
+      motion:
+        days: 10
+      alerts:
+        retain:
+          days: 10
+      detections:
+        retain:
+          days: 7
+    snapshots:
+      enabled: true
+      retain:
+        default: 7
+    notifications:
+      enabled: true
+
+version: 0.18-0
+
+semantic_search:
+  enabled: true
+  model_size: large
+
+face_recognition:
+  enabled: true
+  model_size: large
+
+lpr:
+  enabled: false
+
+classification:
+  bird:
+    enabled: false
+  custom: {}
+
+notifications:
+  enabled: true
+  email: {FRIGATE_NOTIFICATION_EMAIL}

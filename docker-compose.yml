@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  frigate:
+    container_name: frigate
+    privileged: true # or use proper shm_size and devices
+    restart: unless-stopped
+    image: ghcr.io/blakeblackshear/frigate:stable
+    shm_size: "256mb"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128 # Hardware acceleration (Intel/AMD) if available
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/config
+      - ${STORAGE_PATH:-/data/nvr}:/media/frigate
+      - type: tmpfs # Optional 1GB cache in RAM for recording segments
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "8971:8971" # Frigate Web UI & API (HTTPS/Auth)
+      - "5000:5000" # Frigate Web UI & API (HTTP unauthenticated if enabled)
+      - "8554:8554" # RTSP feeds
+      - "8555:8555/tcp" # WebRTC
+      - "8555:8555/udp" # WebRTC
+      - "1984:1984" # go2rtc API
+    environment:
+      - FRIGATE_RTSP_PASSWORD=${FRIGATE_RTSP_PASSWORD}
+      - TZ=${TIMEZONE:-UTC}

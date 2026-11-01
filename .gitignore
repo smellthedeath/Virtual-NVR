@@ -1,0 +1,30 @@
+# Ignore secret and environment files
+.env
+*.local
+*.secret
+
+# Ignore database and cache files
+*.db
+*.db-shm
+*.db-wal
+*.lock
+.vacuum
+.exports
+.timeline
+.jwt_secret
+.runtime_state.json*
+.search_stats.json*
+model_cache/
+
+# Ignore media and recording volumes
+media/
+recordings/
+clips/
+exports/
+
+# Ignore temporary and log files
+*.log
+scratch/
+__pycache__/
+.DS_Store
+Thumbs.db

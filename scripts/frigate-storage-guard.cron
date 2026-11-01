@@ -1,0 +1,2 @@
+# Run storage guard check every 30 minutes
+*/30 * * * * root /usr/local/bin/frigate-storage-guard.sh >> /var/log/frigate-storage-guard.log 2>&1
